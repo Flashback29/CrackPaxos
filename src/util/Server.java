@@ -26,7 +26,7 @@ public class Server {
 		commService.start();
 	}
 
-	public boolean SetValue(Double value) {
+	public boolean SetValue(Integer value) {
 		int logIndex = log.Size();
 		commService.Create(logIndex);
 		proposer.get(logIndex).SetLeader(value);

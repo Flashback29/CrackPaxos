@@ -1,6 +1,5 @@
 package paxos;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -29,26 +28,13 @@ public class Acceptor {
 		}
 	}
 
-	public void ReceiveAccept(BallotNumber bal, Double val) {
+	public void ReceiveAccept(BallotNumber bal, Integer val) {
 		if (bal.compareTo(paxos.ballotNumber) >= 0) {
 			paxos.ballotNumber = bal.copy();
 			paxos.acceptVal = val;
 
 			if (!first.contains(bal)) {
 				commService.SendAccept(bal, val, paxos.logIndex);
-				first.add(bal);
-			}
-			// send accept to all
-		}
-	}
-	
-	public void ReceiveEnhancedAccept(BallotNumber bal, ArrayList<Double> val) {
-		if (bal.compareTo(paxos.ballotNumber) >= 0) {
-			paxos.ballotNumber = bal.copy();
-			paxos.appendAcceptVal = val;
-
-			if (!first.contains(bal)) {
-				commService.SendEnhancedAccept(bal, val, paxos.logIndex);
 				first.add(bal);
 			}
 			// send accept to all

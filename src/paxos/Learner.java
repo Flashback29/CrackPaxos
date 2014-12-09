@@ -1,6 +1,5 @@
 package paxos;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -27,65 +26,29 @@ public class Learner {
 		this.log = log;
 	}
 
-	public void ReceiveAccept(BallotNumber bal, Double val) {
+	public void ReceiveAccept(BallotNumber bal, Integer val) {
 		countAccept.put(bal,
 				(countAccept.get(bal) == null ? 0 : countAccept.get(bal)) + 1);
 		if (countAccept.get(bal) >= paxos.numberOfMajority) {
 			// decide v
-			paxos.acceptVal = null;
 			commService.SendDecide(bal, val, paxos.logIndex);
 		}
 	}
-	
-	public void ReceiveEnhancedAccept(BallotNumber bal, ArrayList<Double> val) {
-		countAccept.put(bal,
-				(countAccept.get(bal) == null ? 0 : countAccept.get(bal)) + 1);
-		if (countAccept.get(bal) >= paxos.numberOfMajority) {
-			// decide v
-			paxos.appendAcceptVal = null;
-			commService.SendEnhancedDecide(bal, val, paxos.logIndex);
-		}
-	}
 
-	public void ReceiveDecide(final BallotNumber bal, final Double val) {
+	public void ReceiveDecide(final BallotNumber bal, final Integer val) {
 		// decide v
 		paxos.acceptVal = null;
 		log.Write(bal, val, paxos.logIndex);
-		
+
 		countDecide.put(bal,
 				(countDecide.get(bal) == null ? 0 : countDecide.get(bal)) + 1);
-		if (!sending ) {
+		if (!sending) {
 			sending = true;
 			new Thread() {
 				public void run() {
 					while (true) {
 						paxos.acceptVal = null;
 						commService.SendDecide(bal, val, paxos.logIndex);
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}.start();
-		}
-	}
-	
-	public void ReceiveEnhancedDecide(final BallotNumber bal, final ArrayList<Double> val) {
-		// decide v
-		paxos.acceptVal = null;
-		log.EnhancedWrite(bal, val, paxos.logIndex);
-		
-		countDecide.put(bal,
-				(countDecide.get(bal) == null ? 0 : countDecide.get(bal)) + 1);
-		if (!sending ) {
-			sending = true;
-			new Thread() {
-				public void run() {
-					while (true) {
-						paxos.acceptVal = null;
-						commService.SendEnhancedDecide(bal, val, paxos.logIndex);
 						try {
 							Thread.sleep(1000);
 						} catch (InterruptedException e) {

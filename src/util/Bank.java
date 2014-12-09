@@ -16,19 +16,19 @@ public class Bank {
 		server = new Server(id, numberOfMajority, servers, port);
 	}
 
-	public static boolean Deposit(Double value) {
-		double bal = Balance();
+	public static boolean Deposit(Integer value) {
+		int bal = Balance();
 		return server.SetValue(value + bal);
 	}
 
-	public static boolean Withdraw(Double value) {
-		double bal = Balance();
+	public static boolean Withdraw(Integer value) {
+		int bal = Balance();
 		if (bal < value)
 			return false;
 		return server.SetValue(bal - value);
 	}
 
-	public static Double Balance() {
+	public static Integer Balance() {
 		return server.log.GetValue();
 	}
 
@@ -39,54 +39,37 @@ public class Bank {
 	public static void Unfail() {
 		server.commService.running = true;
 	}
-	public static void Print(){
-		server.log.Print();
-	}
-	public static void Modify(){
-		server.commService.modify = true;
+
+	private static void Print() {
+		for (int i = 0; i < server.log.Size(); i++) {
+			System.out.println(i + "\t" + server.log.numbers.get(i).toMsg()
+					+ "\t" + server.log.values.get(i));
+		}
 	}
 
 	public static void main(String[] args) throws InterruptedException {
 		ArrayList<Endpoint> servers = new ArrayList<Endpoint>();
-		int port1 = 11111;
-		int n = 5;
-		//int[] port = new int[n];
-		Endpoint[] e = new Endpoint[n];
-		servers.add(new Endpoint("54.173.92.139",port1));
-		servers.add(new Endpoint("54.149.87.52",port1));
-		servers.add(new Endpoint("54.154.0.20",port1));
-		servers.add(new Endpoint("54.94.231.222",port1));
-		servers.add(new Endpoint("54.169.187.65",port1));
-		/*
-		for (int i = 0; i < n; i++) {
-			port[i] = port1 + i;
-			e[i] = new Endpoint("127.0.0.1", port[i]);
-			servers.add(e[i]);
-		}*/
 		Bank bank = new Bank(Integer.parseInt(args[0]),
 				Integer.parseInt(args[1]), servers, Integer.parseInt(args[2]));
 		Scanner in = new Scanner(System.in);
 		String line = "";
-		System.out.println("Deposit: 1");
-		System.out.println("Withdraw: 2");
-		System.out.println("Balance: 3");
-		System.out.println("Fail: 4");
-		System.out.println("UnFail: 5");
-		System.out.println("Print: 6");
-		System.out.println("Modiefied ISPaxos 7");
-		while (in.hasNextInt()) {
+		do {
+			System.out.println("Deposit: 1");
+			System.out.println("Withdraw: 2");
+			System.out.println("Balance: 3");
+			System.out.println("Fail: 4");
+			System.out.println("Unfail: 5");
+			System.out.println("Print: 6");
 			int opt = in.nextInt();
 			switch (opt) {
 			case 1:
-				Deposit(in.nextDouble());
+				Deposit(in.nextInt());
 				break;
 			case 2:
-				if(!Withdraw(in.nextDouble())){
-					System.out.println("Withdrew Fail. Your bank value is less than the value you want to withdraw.");
-				}
+				Withdraw(in.nextInt());
 				break;
 			case 3:
-				System.out.println(Balance());
+				Balance();
 				break;
 			case 4:
 				Fail();
@@ -97,10 +80,8 @@ public class Bank {
 			case 6:
 				Print();
 				break;
-			case 7:
-				Modify();
 			}
-		}
+		} while (in.hasNextInt());
 
 	}
 }

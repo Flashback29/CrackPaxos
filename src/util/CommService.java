@@ -22,7 +22,6 @@ public class CommService extends Thread {
 	private int id;
 	private int numberOfMajority;
 	public boolean running = true;
-	public boolean modify = false;
 
 	public CommService(ArrayList<Endpoint> servers, int id, int numberOfMajority) {
 		this.servers = servers;
@@ -49,7 +48,7 @@ public class CommService extends Thread {
 	}
 
 	public void SendTo(Endpoint endpoint, String msg) {
-		//System.out.println("Sending : " + msg + " --  " + port + "->"
+		// System.out.println("Sending : " + msg + " --  " + port + "->"
 		//		+ endpoint.ip + ":" + endpoint.port);
 		String server = endpoint.ip;
 		int port = endpoint.port;
@@ -70,24 +69,17 @@ public class CommService extends Thread {
 	}
 
 	public void SendACK(BallotNumber bal, BallotNumber accpetNum,
-			Double acceptVal, String ip, int port, int logIndex) {
+			Integer acceptVal, String ip, int port, int logIndex) {
 		SendTo(new Endpoint(ip, port), new Message.ACK(bal, accpetNum,
 				acceptVal, logIndex).toMsg());
 	}
 
-	public void SendAccept(BallotNumber bal, Double acceptVal, int logIndex) {
+	public void SendAccept(BallotNumber bal, Integer acceptVal, int logIndex) {
 		SendToAll(new Message.Accept(bal, acceptVal, logIndex).toMsg());
 	}
-	public void SendEnhancedAccept(BallotNumber bal, ArrayList<Double> acceptVal, int logIndex){
-		SendToAll(new Message.EnhancedAccept(bal, acceptVal, logIndex).toMsg());
-	}
 
-	public void SendDecide(BallotNumber bal, Double acceptVal, int logIndex) {
+	public void SendDecide(BallotNumber bal, Integer acceptVal, int logIndex) {
 		SendToAll(new Message.Decide(bal, acceptVal, logIndex).toMsg());
-	}
-	
-	public void SendEnhancedDecide(BallotNumber bal, ArrayList<Double> acceptVal, int logIndex) {
-		SendToAll(new Message.EnhancedDecide(bal, acceptVal, logIndex).toMsg());
 	}
 
 	public void SendToAll(String msg) {
@@ -105,9 +97,8 @@ public class CommService extends Thread {
 				final InetSocketAddress address = (InetSocketAddress) clientSocket
 						.getRemoteSocketAddress();
 				final String message = in.readLine();
-				while(!running){
-					
-				}
+				if (!running)
+					continue;
 				new Thread() {
 					public void run() {
 						Call(message, address.getHostName(),
@@ -124,7 +115,7 @@ public class CommService extends Thread {
 
 	private void Call(String readLine, String ip, int port) {
 		if (readLine != null) {
-			//System.out.println("Port: " + port + " Receiving: " + readLine);
+			// System.out.println("Port: " + port + " Receiving: " + readLine);
 			if (readLine.contains(":")) {
 				String type = readLine.split(":")[0];
 				String msg = readLine.split(":")[1];
@@ -139,64 +130,25 @@ public class CommService extends Thread {
 					return;
 				}
 				Create(index);
-				//System.out.println(log.Size());
+				// System.out.println(log.Size());
 				if (type.equals("Prepare")) {
 					Message.Prepare message = new Message.Prepare(msg);
-					//port = 11110 + message.getProcessorID();
-					port = 11111;	//this is important for different ports
+					port = 11111;
 					acceptor.get(index).ReceivePrepare(message.bal, ip, port);
 				} else if (type.equals("ACK")) {
 					Message.ACK message = new Message.ACK(msg);
-					if(!modify){
-						proposer.get(index).ReceiveACK(message.bal,
-								message.accpetNum, message.acceptVal);
-					}
-					else{
-						proposer.get(index).EnhancedReceiveACK(message.bal,
-								message.accpetNum, message.acceptVal, log.GetValue());
-					}
+					proposer.get(index).ReceiveACK(message.bal,
+							message.accpetNum, message.acceptVal);
 				} else if (type.equals("Accept")) {
-					
-					//if(!modify){
-						Message.Accept message = new Message.Accept(msg);
-						if(!message.modify){
-							acceptor.get(index).ReceiveAccept(message.accpetNum,
-									message.acceptVal);
-							learner.get(index).ReceiveAccept(message.accpetNum,
-									message.acceptVal);
-						}
-						else{
-							acceptor.get(index).ReceiveEnhancedAccept(message.accpetNum,
-									message.acceptAppendVal);
-							learner.get(index).ReceiveEnhancedAccept(message.accpetNum,
-									message.acceptAppendVal);
-						}
-					/*}
-					else{
-						Message.EnhancedAccept message = new Message.EnhancedAccept(msg);
-						acceptor.get(index).ReceiveEnhancedAccept(message.accpetNum,
-								message.acceptVal);
-						learner.get(index).ReceiveEnhancedAccept(message.accpetNum,
-								message.acceptVal);
-					}*/
-					
+					Message.Accept message = new Message.Accept(msg);
+					acceptor.get(index).ReceiveAccept(message.accpetNum,
+							message.acceptVal);
+					learner.get(index).ReceiveAccept(message.accpetNum,
+							message.acceptVal);
 				} else if (type.equals("Decide")) {
-					//if(!modify){
-						Message.Decide message = new Message.Decide(msg);
-						if(!message.modify){
-							learner.get(index).ReceiveDecide(message.accpetNum,
-									message.acceptVal);
-						}
-						else{
-							learner.get(index).ReceiveEnhancedDecide(message.accpetNum,
-									message.acceptAppendVal);
-						}
-					/*}
-					else{
-						Message.EnhancedDecide message = new Message.EnhancedDecide(msg);
-						learner.get(index).ReceiveEnhancedDecide(message.accpetNum,
-								message.acceptVal);
-					}*/
+					Message.Decide message = new Message.Decide(msg);
+					learner.get(index).ReceiveDecide(message.accpetNum,
+							message.acceptVal);
 				}
 			}
 		}
