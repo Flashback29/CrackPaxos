@@ -50,13 +50,19 @@ public class Bank {
 		ArrayList<Endpoint> servers = new ArrayList<Endpoint>();
 		int port1 = 11111;
 		int n = 5;
-		int[] port = new int[n];
+		//int[] port = new int[n];
 		Endpoint[] e = new Endpoint[n];
+		servers.add(new Endpoint("54.173.92.139",port1));
+		servers.add(new Endpoint("54.149.87.52",port1));
+		servers.add(new Endpoint("54.154.0.20",port1));
+		servers.add(new Endpoint("54.94.231.222",port1));
+		servers.add(new Endpoint("54.169.187.65",port1));
+		/*
 		for (int i = 0; i < n; i++) {
 			port[i] = port1 + i;
 			e[i] = new Endpoint("127.0.0.1", port[i]);
 			servers.add(e[i]);
-		}
+		}*/
 		Bank bank = new Bank(Integer.parseInt(args[0]),
 				Integer.parseInt(args[1]), servers, Integer.parseInt(args[2]));
 		Scanner in = new Scanner(System.in);

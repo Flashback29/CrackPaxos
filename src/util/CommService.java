@@ -142,8 +142,8 @@ public class CommService extends Thread {
 				System.out.println(log.Size());
 				if (type.equals("Prepare")) {
 					Message.Prepare message = new Message.Prepare(msg);
-					port = 11110 + message.getProcessorID();
-					//port = 11111;	//this is important for different ports
+					//port = 11110 + message.getProcessorID();
+					port = 11111;	//this is important for different ports
 					acceptor.get(index).ReceivePrepare(message.bal, ip, port);
 				} else if (type.equals("ACK")) {
 					Message.ACK message = new Message.ACK(msg);
